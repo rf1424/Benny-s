@@ -155,6 +155,8 @@ MonoBehaviour:
   gameTransform: {fileID: 1554866703}
   piecePrefab: {fileID: 1761345382776524045, guid: 4e34022c11c13c341bbe0abf33b66849,
     type: 3}
+  pickDoor: {fileID: 2100000, guid: c8673679a577dfb4fa7a8798643b54f5, type: 2}
+  quaker: {fileID: 2100000, guid: 3305b9048ffc3f14099e0f98b97c5a2d, type: 2}
 --- !u!4 &604057669
 Transform:
   m_ObjectHideFlags: 0

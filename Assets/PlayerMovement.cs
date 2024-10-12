@@ -8,7 +8,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController characterController;
-    public float speed = 12.0f;
+    public float speed = 3.0f;
 
     // Update is called once per frame
     void Update()
