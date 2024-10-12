@@ -38,6 +38,8 @@ public class GameController : MonoBehaviour
         gameGuesses = gamePuzzles.Count / 2;
     }
 
+    //Hi mc
+
     void GetButtons()
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("PuzzleButton");
