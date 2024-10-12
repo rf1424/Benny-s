@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +12,14 @@ public class GameManager : MonoBehaviour
     private int emptyLocation;
     private int size;
     private bool shuffling = false;
+
+    [SerializeField] private Material pickDoor;
+    [SerializeField] private Material quaker;
+
+    private bool pickingDoors;
+
+    private int[] doorsPicked = new int[3];
+    private int numDoorsPicked = 0;
 
     // Create the game setup with size x size pieces.
     private void CreateGamePieces(float gapThickness)
@@ -29,25 +38,27 @@ public class GameManager : MonoBehaviour
                                                   +1 - (2 * width * row) - width);
                 piece.localScale = ((2 * width) - gapThickness) * Vector3.one;
                 piece.name = $"{(row * size) + col}";
+
+                piece.GetComponent<MeshRenderer>().material = quaker;
+
+                // We want to map the UV coordinates appropriately, they are 0->1.
+                float gap = gapThickness / 2;
+                Mesh mesh = piece.GetComponent<MeshFilter>().mesh;
+                Vector2[] uv = new Vector2[4];
+                // UV coord order: (0, 1), (1, 1), (0, 0), (1, 0)
+                uv[0] = new Vector2((width * col) + gap, 1 - ((width * (row + 1)) - gap));
+                uv[1] = new Vector2((width * (col + 1)) - gap, 1 - ((width * (row + 1)) - gap));
+                uv[2] = new Vector2((width * col) + gap, 1 - ((width * row) + gap));
+                uv[3] = new Vector2((width * (col + 1)) - gap, 1 - ((width * row) + gap));
+                // Assign our new UVs to the mesh.
+                mesh.uv = uv;
+
                 // We want an empty space in the bottom right.
                 if ((row == size - 1) && (col == size - 1))
                 {
                     emptyLocation = (size * size) - 1;
                     piece.gameObject.SetActive(false);
-                }
-                else
-                {
-                    // We want to map the UV coordinates appropriately, they are 0->1.
-                    float gap = gapThickness / 2;
-                    Mesh mesh = piece.GetComponent<MeshFilter>().mesh;
-                    Vector2[] uv = new Vector2[4];
-                    // UV coord order: (0, 1), (1, 1), (0, 0), (1, 0)
-                    uv[0] = new Vector2((width * col) + gap, 1 - ((width * (row + 1)) - gap));
-                    uv[1] = new Vector2((width * (col + 1)) - gap, 1 - ((width * (row + 1)) - gap));
-                    uv[2] = new Vector2((width * col) + gap, 1 - ((width * row) + gap));
-                    uv[3] = new Vector2((width * (col + 1)) - gap, 1 - ((width * row) + gap));
-                    // Assign our new UVs to the mesh.
-                    mesh.uv = uv;
+
                 }
             }
         }
@@ -59,6 +70,7 @@ public class GameManager : MonoBehaviour
         pieces = new List<Transform>();
         size = 3;
         CreateGamePieces(0.01f);
+        Shuffle();
     }
 
     // Update is called once per frame
@@ -67,37 +79,91 @@ public class GameManager : MonoBehaviour
         // Check for completion.
         if (!shuffling && CheckCompletion())
         {
+
             shuffling = true;
             StartCoroutine(WaitShuffle(0.5f));
         }
 
-        // On click send out ray to see if we click a piece.
-        if (Input.GetMouseButtonDown(0))
+        if (!pickingDoors)
         {
-            //Vector2 vecTest = new Vector2(0, -1);
-            //RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), vecTest);
-            //if (hit)
-            //{
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
+
+            // On click send out ray to see if we click a piece.
+            if (Input.GetMouseButtonDown(0))
             {
-                // Handle hit
-            
-            // Go through the list, the index tells us the position.
-            for (int i = 0; i < pieces.Count; i++)
+                //Vector2 vecTest = new Vector2(0, -1);
+                //RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), vecTest);
+                //if (hit)
+                //{
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out hit))
                 {
-                    if (pieces[i] == hit.transform)
+                    // Handle hit
+
+                    // Go through the list, the index tells us the position.
+                    for (int i = 0; i < pieces.Count; i++)
                     {
-                        // Check each direction to see if valid move.
-                        // We break out on success so we don't carry on and swap back again.
-                        if (SwapIfValid(i, -size, size)) { break; }
-                        if (SwapIfValid(i, +size, size)) { break; }
-                        if (SwapIfValid(i, -1, 0)) { break; }
-                        if (SwapIfValid(i, +1, size - 1)) { break; }
+                        if (pieces[i] == hit.transform)
+                        {
+                            // Check each direction to see if valid move.
+                            // We break out on success so we don't carry on and swap back again.
+                            if (SwapIfValid(i, -size, size)) { break; }
+                            if (SwapIfValid(i, +size, size)) { break; }
+                            if (SwapIfValid(i, -1, 0)) { break; }
+                            if (SwapIfValid(i, +1, size - 1)) { break; }
+                        }
                     }
                 }
             }
+
+        }
+
+        else // picking doors
+        {
+
+            // On click send out ray to see if we click a piece.
+            if (Input.GetMouseButtonDown(0))
+            {
+                //Vector2 vecTest = new Vector2(0, -1);
+                //RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), vecTest);
+                //if (hit)
+                //{
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out hit))
+                {
+                    // Handle hit
+
+                    // Go through the list, the index tells us the position.
+                    for (int i = 0; i < pieces.Count; i++)
+                    {
+                        if (pieces[i] == hit.transform)
+                        {
+                            int[] doorsToDoors = { 1, -1, 4, 2, -1, 5, 3, -1, 6};
+                            int door = doorsToDoors[i];
+                            if (door != -1)
+                            {
+                                doorsPicked[numDoorsPicked] = door;
+                                numDoorsPicked++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (numDoorsPicked == 3)
+            {
+
+                Debug.Log("3 doors picked, loading SampleScene...");
+
+                GameData.doorsPicked = this.doorsPicked;
+
+                SceneManager.LoadScene("SampleScene");
+
+            }
+
+
+
         }
     }
 
@@ -132,8 +198,11 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator WaitShuffle(float duration)
     {
+
+        showDoorSelect();
+
         yield return new WaitForSeconds(duration);
-        Shuffle();
+        // Shuffle();
         shuffling = false;
     }
 
@@ -166,6 +235,17 @@ public class GameManager : MonoBehaviour
             {
                 count++;
             }
+        }
+    }
+
+    private void showDoorSelect()
+    {
+
+        foreach (var piece in pieces)
+        {
+            piece.GetComponent<MeshRenderer>().material = pickDoor;
+            piece.gameObject.SetActive(true);
+            pickingDoors = true;
         }
     }
 }
