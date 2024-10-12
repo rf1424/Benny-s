@@ -156,7 +156,10 @@ public class GameManager : MonoBehaviour
 
                 Debug.Log("3 doors picked, loading SampleScene...");
 
-                GameData.doorsPicked = this.doorsPicked;
+                //GameData.doorsPicked = this.doorsPicked;
+                GameData.doorsPicked[0] = this.doorsPicked[0];
+                GameData.doorsPicked[1] = this.doorsPicked[1];
+                GameData.doorsPicked[2] = this.doorsPicked[2];
 
                 SceneManager.LoadScene("SampleScene");
 
