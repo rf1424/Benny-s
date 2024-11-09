@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
@@ -149,6 +150,8 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("game finished");
             Debug.Log("it took you " + countGuesses + " guesses to finish the game");
+
+            SceneManager.LoadScene("SampleScene");
         }
     }
 
