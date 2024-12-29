@@ -32,7 +32,8 @@ public class ChangeToPuzzle : MonoBehaviour
                 Debug.Log("test2");
 
                 // switch to second puzzle
-                SceneManager.LoadScene("Memory Game");
+                SceneManager.LoadScene("SlidingPuzzle");
+                // SceneManager.LoadScene("Memory Game");
 
             } else
             {

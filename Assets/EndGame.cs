@@ -6,14 +6,17 @@ using UnityEngine.UI;
 public class EndGame : MonoBehaviour
 {
     public GameObject Endtext;
+    private PlayerMovement playerMovement;
     private void OnTriggerEnter(Collider p)
     {
-        // Check if the object entering the trigger is the player
         if (p.CompareTag("Player"))
         {
-            //EndGame();
+            
             Endtext.SetActive(true);
-            Debug.Log("Game Ended");
+            Time.timeScale = 0f;
+            playerMovement = p.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+                playerMovement.enabled = false;
         }
     }
 }
