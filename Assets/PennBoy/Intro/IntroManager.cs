@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -26,13 +24,13 @@ public class IntroManager : MonoBehaviour
     public AudioSource jingle;
     public AudioSource bing;
 
-    private bool polling;
-    private (RectTransform rectTransform, Image image) bgAttrs;
-    private (RectTransform rectTransform, CanvasGroup canvasGroup) logoAttrs;
-    private List<(RectTransform rectTransform, CanvasGroup canvasGroup, Image image)> letterAttrs;
-    private List<(RectTransform rectTransform, CanvasGroup canvasGroup)> textAttrs;
-
     public Image transitionObj;
+    private (RectTransform rectTransform, Image image) bgAttrs;
+    private List<(RectTransform rectTransform, CanvasGroup canvasGroup, Image image)> letterAttrs;
+
+    private bool polling;
+    private List<(RectTransform rectTransform, CanvasGroup canvasGroup)> textAttrs;
+    private (RectTransform rectTransform, CanvasGroup canvasGroup, Image image) upgradeLogoAttrs;
 
     private void Awake() {
 #if UNITY_EDITOR
@@ -41,7 +39,8 @@ public class IntroManager : MonoBehaviour
 #endif
         // Get all necessary components
         bgAttrs = (repeatingBg.GetComponent<RectTransform>(), repeatingBg.GetComponent<Image>());
-        logoAttrs = (upgradeLogo.GetComponent<RectTransform>(), upgradeLogo.GetComponent<CanvasGroup>());
+        upgradeLogoAttrs = (upgradeLogo.GetComponent<RectTransform>(), upgradeLogo.GetComponent<CanvasGroup>(),
+                            upgradeLogo.GetComponent<Image>());
 
         letterAttrs = new List<(RectTransform, CanvasGroup, Image)>(letters.Count);
         foreach (var letter in letters) {
@@ -58,14 +57,13 @@ public class IntroManager : MonoBehaviour
         // Set everything to their default states
         pressAnyKey.paused = true;
         bgAttrs.image.color = Color.black;
-        textAttrs.ForEach((attrs) => attrs.canvasGroup.alpha = 0f);
-        logoAttrs.rectTransform.anchoredPosition = new Vector2(logoAttrs.rectTransform.anchoredPosition.x, -1000);
-        logoAttrs.canvasGroup.alpha = 1f;
+        textAttrs.ForEach(attrs => attrs.canvasGroup.alpha = 0f);
+        upgradeLogoAttrs.canvasGroup.alpha = 1f;
 
         foreach (var (rectTrans, canvasGroup, image) in letterAttrs) {
             canvasGroup.alpha = 0f;
             rectTrans.anchoredPosition = new Vector2(rectTrans.anchoredPosition.x, -700);
-            image.color = Theme.Up[4];
+            image.color = Theme.Up[7];
         }
     }
 
@@ -119,21 +117,21 @@ public class IntroManager : MonoBehaviour
 
     private IEnumerator AnimateLogoSequence() {
         // Fade out all the text
-        yield return Anim.Animate(0.3f, t => {
-            textAttrs.ForEach((attrs) => attrs.canvasGroup.alpha = 1f - t);
+        yield return Anim.Animate(0.6f, t => {
+            textAttrs.ForEach(attrs => attrs.canvasGroup.alpha = 1f - t);
         });
 
         // Zoom out background
         var initBgScale = bgAttrs.rectTransform.localScale;
         var finalBgScale = new Vector3(1.5f, 1.5f, 1.5f);
-        StartCoroutine(Anim.Animate(0.7f, t => {
+        StartCoroutine(Anim.Animate(0.9f, t => {
             var newT = Easing.EaseInOutQuint(t);
             bgAttrs.rectTransform.localScale = Vector3.Lerp(initBgScale, finalBgScale, newT);
         }));
 
-        // Fade background to Up[0]
+        // Fade background from grey to Theme 11 (index 10)
         var initBgCol = bgAttrs.image.color;
-        StartCoroutine(Anim.Animate(0.3f, t => {
+        StartCoroutine(Anim.Animate(0.6f, t => {
             bgAttrs.image.color = Color.Lerp(initBgCol, Theme.Up[10], t);
         }));
 
@@ -156,20 +154,36 @@ public class IntroManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
 
+        yield return new WaitForSeconds(0.4f);
+
+        // Nudge up all the PennBoy letters at the same time
+        foreach (var (rectTrans, canvasGroup, image) in letterAttrs) {
+            var midLetterPos = new Vector2(rectTrans.anchoredPosition.x, rectTrans.anchoredPosition.y);
+            var finalLetterPos = new Vector2(rectTrans.anchoredPosition.x, 150);
+            StartCoroutine(Anim.Animate(1f, t => {
+                rectTrans.anchoredPosition = Vector2.Lerp(midLetterPos, finalLetterPos, Easing.EaseOutExpo(t));
+            }));
+        }
+
+        // Wait a bit before introducing UPGRADE logo
+        yield return new WaitForSeconds(0.1f);
+
         // Zoom in background
         initBgScale = bgAttrs.rectTransform.localScale;
         finalBgScale = new Vector3(2.0f, 2.0f, 2.0f);
-        StartCoroutine(Anim.Animate(0.45f, t => {
-            var newT = Easing.EaseInOutQuint(t);
-            bgAttrs.rectTransform.localScale = Vector3.Lerp(initBgScale, finalBgScale, newT);
+        StartCoroutine(Anim.Animate(1f, t => {
+            bgAttrs.rectTransform.localScale = Vector3.Lerp(initBgScale, finalBgScale, Easing.EaseOutExpo(t));
         }));
 
-        // Fade and translate in UPGRADE logo
-        var initLogoPos = logoAttrs.rectTransform.anchoredPosition;
-        var finalLogoPos = new Vector2(logoAttrs.rectTransform.anchoredPosition.x, -207);
+        // Translate in UPGRADE logo and fade its color from 8 (index 7) to 4 (index 3)
+        var initLogoPos = upgradeLogoAttrs.rectTransform.anchoredPosition;
+        var finalLogoPos = new Vector2(upgradeLogoAttrs.rectTransform.anchoredPosition.x, -250);
         StartCoroutine(Anim.Animate(0.7f, t => {
-            logoAttrs.rectTransform.anchoredPosition =
+            upgradeLogoAttrs.rectTransform.anchoredPosition =
                 Vector2.Lerp(initLogoPos, finalLogoPos, Easing.EaseOutExpo(t));
+        }));
+        StartCoroutine(Anim.Animate(1.2f, t => {
+            upgradeLogoAttrs.image.color = Color.Lerp(Theme.Up[7], Theme.Up[3], t);
         }));
 
         yield return new WaitForSeconds(3.0f);
@@ -179,7 +193,6 @@ public class IntroManager : MonoBehaviour
         });
 
         StartCoroutine(LoadNextScene());
-        
     }
 
     private IEnumerator LoadNextScene() {
@@ -188,44 +201,49 @@ public class IntroManager : MonoBehaviour
         SceneManager.LoadScene("HomePage"); // temp change
     }
 
-
     private IEnumerator ScaleStars(Image star) {
-        yield return Anim.Animate(0.5f, t => {
+        yield return Anim.Animate(0.4f, t => {
+            t = Easing.EaseInOutExpo(t);
             star.rectTransform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, t);
         });
 
-        yield return Anim.Animate(0.5f, t => {
+        yield return Anim.Animate(0.4f, t => {
+            t = Easing.EaseInOutExpo(t);
             star.rectTransform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, t);
         });
     }
 
     private IEnumerator RotateStars(Image star) {
-        for (var i = 1; i <= 360; ++i) {
+        // It's fine if this takes so long, because it will be scaled to zero before it finishes.
+        // We just want a slow rotation speed
+        yield return Anim.Animate(4f, t => {
             star.rectTransform.Rotate(0f, 0f, 1f);
-            yield return null;
-        }
+        });
     }
 
     private IEnumerator PulsePennBoyLetterColor(Image image) {
         var initColor = image.color;
 
         yield return Anim.Animate(0.15f, t => {
-            image.color = Color.Lerp(initColor, (Color.white + Theme.Up[4]) / 2, t);
+            image.color = Color.Lerp(initColor, (Color.white + Theme.Up[3]) / 2, t);
         });
 
         yield return new WaitForSeconds(0.1f);
 
         yield return Anim.Animate(0.15f, t => {
-            image.color = Color.Lerp((Color.white + Theme.Up[4]) / 2, initColor, t);
+            image.color = Color.Lerp((Color.white + Theme.Up[3]) / 2, initColor, t);
         });
     }
 
     private IEnumerator RevealPennBoyLetters(List<(RectTransform, CanvasGroup, Image)> attrs) {
         jingle.PlayDelayed(0.25f);
 
+        // Fades the letters in and translates them upwards onto the screen
         foreach (var (rectTrans, canvasGroup, image) in attrs) {
             var initPos = rectTrans.anchoredPosition;
-            var finalPos = new Vector2(rectTrans.anchoredPosition.x, 78);
+
+            // Translate to center of the screen, will be "pushed up" later by the UPGRADE logo
+            var finalPos = new Vector2(rectTrans.anchoredPosition.x, 0);
 
             StartCoroutine(Anim.Animate(0.25f, t => {
                 canvasGroup.alpha = t;
@@ -242,17 +260,14 @@ public class IntroManager : MonoBehaviour
     }
 
     private IEnumerator AnimatePennBoyLetterColor(Image image) {
-        yield return new WaitForSeconds(0.1f);
-
-        // Colors go from 4 -> 5 -> 6 -> 7 -> 8
-        for (var i = 8; i > 4; i--) {
-            var idx = i;
-
-            yield return Anim.Animate(0.1f, t => {
-                image.color = Color.Lerp(Theme.Up[idx], Theme.Up[idx - 1], t);
+        // Colors go from 8 (index 7) -> 6 (index 5) -> 4 (index 3)
+        for (var i = 4; i > 2; i--) {
+            var idx = i * 2;
+            yield return Anim.Animate(0.3f, t => {
+                image.color = Color.Lerp(Theme.Up[idx - 1], Theme.Up[idx - 3], t);
             });
 
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.75f);
         }
     }
 }

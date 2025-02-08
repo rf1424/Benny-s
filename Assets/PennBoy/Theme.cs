@@ -5,7 +5,7 @@ namespace PennBoy
 {
 public static class Theme
 {
-    public static List<Color> Up = new() {
+    public static readonly List<Color> Up = new() {
         new Color(0.8745098f, 0.9490196f, 1f),
         new Color(0.7333333f, 0.8862746f, 1f),
         new Color(0.5843138f, 0.8235295f, 1f),
