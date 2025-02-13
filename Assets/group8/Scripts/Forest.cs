@@ -35,7 +35,6 @@ public class Forest : MonoBehaviour
             Transform tree = treeTransforms[i];
             float angle = IsObjectInFront(player, tree.position);
             float alpha = 1 - (angle / 180);
-            float threshold = 0.3f;
             //if (alpha > threshold) tree.position = originalPos[i];
             //else
             //{

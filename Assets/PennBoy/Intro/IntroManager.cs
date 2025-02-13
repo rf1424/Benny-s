@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -19,18 +20,21 @@ public class IntroManager : MonoBehaviour
     [Header("Logo Sequence")]
     public GameObject logoSequence;
     public GameObject upgradeLogo;
+    public TMP_Text versionText;
     public List<GameObject> letters;
     public List<Image> stars;
     public AudioSource jingle;
     public AudioSource bing;
 
-    public Image transitionObj;
-    private (RectTransform rectTransform, Image image) bgAttrs;
+    [Header("Transition")]
+    public Image overlay;
+
     private List<(RectTransform rectTransform, CanvasGroup canvasGroup, Image image)> letterAttrs;
+    private List<(RectTransform rectTransform, CanvasGroup canvasGroup)> textAttrs;
+    private (RectTransform rectTransform, Image image) bgAttrs;
+    private (RectTransform rectTransform, CanvasGroup canvasGroup, Image image) upgradeLogoAttrs;
 
     private bool polling;
-    private List<(RectTransform rectTransform, CanvasGroup canvasGroup)> textAttrs;
-    private (RectTransform rectTransform, CanvasGroup canvasGroup, Image image) upgradeLogoAttrs;
 
     private void Awake() {
 #if UNITY_EDITOR
@@ -154,13 +158,13 @@ public class IntroManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
 
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.5f);
 
         // Nudge up all the PennBoy letters at the same time
         foreach (var (rectTrans, canvasGroup, image) in letterAttrs) {
             var midLetterPos = new Vector2(rectTrans.anchoredPosition.x, rectTrans.anchoredPosition.y);
             var finalLetterPos = new Vector2(rectTrans.anchoredPosition.x, 150);
-            StartCoroutine(Anim.Animate(1f, t => {
+            StartCoroutine(Anim.Animate(1.5f, t => {
                 rectTrans.anchoredPosition = Vector2.Lerp(midLetterPos, finalLetterPos, Easing.EaseOutExpo(t));
             }));
         }
@@ -186,19 +190,20 @@ public class IntroManager : MonoBehaviour
             upgradeLogoAttrs.image.color = Color.Lerp(Theme.Up[7], Theme.Up[3], t);
         }));
 
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(0.1f);
 
+        // Fade in version text
+        StartCoroutine(Anim.Animate(1f, t => {
+            versionText.color = Color.Lerp(Color.clear, Theme.Up[6], t);
+        }));
+
+        // Wait for version text to fade in, then start transition
+        yield return new WaitForSeconds(2.0f);
         yield return Anim.Animate(1f, t => {
-            transitionObj.color = new Color(transitionObj.color.r, transitionObj.color.g, transitionObj.color.b, t);
+            overlay.color = new Color(overlay.color.r, overlay.color.g, overlay.color.b, t);
         });
 
-        StartCoroutine(LoadNextScene());
-    }
-
-    private IEnumerator LoadNextScene() {
-        yield return new WaitForSeconds(1f);
-
-        SceneManager.LoadScene("HomePage"); // temp change
+        SceneManager.LoadScene("HomePage");
     }
 
     private IEnumerator ScaleStars(Image star) {
