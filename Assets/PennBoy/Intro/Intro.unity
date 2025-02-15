@@ -2030,7 +2030,7 @@ GameObject:
   - component: {fileID: 939862777}
   - component: {fileID: 939862776}
   m_Layer: 5
-  m_Name: TransitionCanvas
+  m_Name: Transition Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
