@@ -203,7 +203,7 @@ public class IntroManager : MonoBehaviour
             overlay.color = new Color(overlay.color.r, overlay.color.g, overlay.color.b, t);
         });
 
-        SceneManager.LoadScene("HomePage");
+        SceneManager.LoadScene("PulseTransition");
     }
 
     private IEnumerator ScaleStars(Image star) {
