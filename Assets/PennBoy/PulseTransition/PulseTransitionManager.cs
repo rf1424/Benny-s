@@ -63,8 +63,8 @@ public class PulseTransitionManager : MonoBehaviour
 
         StartCoroutine(ChangeAlphaTo(cgList[7], 1f, 0f, secondDuration));
 
-        // Wait for the last channel to disappear
-        yield return new WaitForSeconds(secondDuration);
+        // Wait for the last channel to disappear and then a little bit more
+        yield return new WaitForSeconds(secondDuration + 0.6f);
 
         SceneManager.LoadScene("HomePage");
     }
