@@ -17,6 +17,9 @@ public class PulseTransitionManager : MonoBehaviour
             cg.alpha = 0f;
             cgList.Add(cg);
         }
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private IEnumerator Start() {
@@ -25,6 +28,7 @@ public class PulseTransitionManager : MonoBehaviour
 
         const float firstDuration = 0.6f;
         const float secondDuration = 0.7f;
+
 
         StartCoroutine(ChangeAlphaTo(cgList[0], 0f, 1f, firstDuration));
         yield return new WaitForSeconds(firstWaitDuration);
@@ -66,6 +70,8 @@ public class PulseTransitionManager : MonoBehaviour
         // Wait for the last channel to disappear and then a little bit more
         yield return new WaitForSeconds(secondDuration + 0.6f);
 
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         SceneManager.LoadScene("HomePage");
     }
 
