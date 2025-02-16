@@ -3,21 +3,24 @@ using UnityEngine.SceneManagement;
 
 public class Pause : MonoBehaviour
 {
-    [SerializeField] private GameObject pauseUI;
+    private static Pause I;
+    
+    [SerializeField] private GameObject pause;
+    [SerializeField] private CanvasGroup overlay;
+    
     private float timeScale;
     private CursorLockMode prevLockState;
     private bool isPaused;
-    private static Pause instance;
+    
     public string[] lockedScenes;
-
-
+    
     public void TogglePauseGame() {
         // not paused
         timeScale = Time.timeScale != 0f ? Time.timeScale : timeScale;
         prevLockState = Cursor.lockState == CursorLockMode.None ? prevLockState : Cursor.lockState;
 
         isPaused = !isPaused;
-        pauseUI.SetActive(isPaused);
+        pause.SetActive(isPaused);
 
         Cursor.lockState = isPaused ? CursorLockMode.None : prevLockState;
         Cursor.visible = Cursor.lockState == CursorLockMode.None;
@@ -56,9 +59,9 @@ public class Pause : MonoBehaviour
     }
 
     private void Awake() {
-        if (instance == null) {
+        if (I == null) {
             // default behavior: pause = isPaused
-            instance = this;
+            I = this;
             timeScale = Time.timeScale;
             DontDestroyOnLoad(gameObject);
             return;
