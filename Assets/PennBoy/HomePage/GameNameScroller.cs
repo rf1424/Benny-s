@@ -24,18 +24,22 @@ public class GameNameScroller : MonoBehaviour
     private const float Y_POS_CLOSED = 200f;
     private const float DURATION_APPEAR = 0.6f;
     private const float DURATION_CLOSE = 0.7f;
+    private const float SLOW_DOWN_DURATION = 0.85f;
 
-    private Coroutine curr;
+    private Coroutine barCoroutine;
+    private Coroutine scrollCoroutine;
     private StringBuilder sb;
     private string format;
     private TMP_Text gameName;
     private RectTransform rt;
     private float timerElapsed;
+    private float initialScrollSpeed;
 
     private void Awake() {
         sb = new StringBuilder();
         gameName = nameTextObj.GetComponent<TMP_Text>();
         rt = nameTextObj.GetComponent<RectTransform>();
+        initialScrollSpeed = scrollSpeed;
 
         // Hide bar again because it's visible initially in the editor
         Reset();
@@ -54,8 +58,23 @@ public class GameNameScroller : MonoBehaviour
         }
     }
 
+    private IEnumerator SlowDownScrollSpeed() {
+        var elapsed = 0f;
+
+        while (elapsed < SLOW_DOWN_DURATION) {
+            scrollSpeed = Mathf.Lerp(40_000f, initialScrollSpeed, Easing.EaseOutExpo(elapsed / SLOW_DOWN_DURATION));
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        scrollSpeed = initialScrollSpeed;
+    }
+
     private IEnumerator _Appear() {
         IsCurrentlyOpen = true;
+
+        if (scrollCoroutine != null) StopCoroutine(scrollCoroutine);
+        scrollCoroutine = StartCoroutine(SlowDownScrollSpeed());
 
         var elapsed = 0f;
         var init = new Vector2(bar.anchoredPosition.x, Y_POS_CLOSED);
@@ -71,7 +90,7 @@ public class GameNameScroller : MonoBehaviour
     }
 
     private IEnumerator _Disappear() {
-        if (curr != null) StopCoroutine(curr);
+        if (barCoroutine != null) StopCoroutine(barCoroutine);
 
         var elapsed = 0f;
         var init = bar.anchoredPosition;
@@ -88,8 +107,8 @@ public class GameNameScroller : MonoBehaviour
         IsCurrentlyOpen = false;
     }
 
-    public void Appear() => curr = StartCoroutine(_Appear());
-    public void Disappear() => curr = StartCoroutine(_Disappear());
+    public void Appear() => barCoroutine = StartCoroutine(_Appear());
+    public void Disappear() => barCoroutine = StartCoroutine(_Disappear());
 
     public void UpdateText(string newGameName) {
         sb.Clear();
@@ -103,7 +122,7 @@ public class GameNameScroller : MonoBehaviour
     }
 
     public void Reset() {
-        if (curr != null) StopCoroutine(curr);
+        if (barCoroutine != null) StopCoroutine(barCoroutine);
         bar.anchoredPosition = new Vector2(bar.anchoredPosition.x, Y_POS_CLOSED);
         rt.anchoredPosition = new Vector2(0f, rt.anchoredPosition.y);
         IsCurrentlyOpen = false;
