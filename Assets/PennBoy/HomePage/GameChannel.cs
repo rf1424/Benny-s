@@ -36,6 +36,7 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (curr != null) StopCoroutine(curr);
         curr = StartCoroutine(AnimateScale(ScaleAnim.Expand));
 
+        scroller.UpdateText(gameObject.name);
         if (scroller.IsCurrentlyOpen) scroller.Reset();
         scroller.Appear();
     }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text;
 using PennBoy;
 using TMPro;
 using UnityEngine;
@@ -16,10 +17,13 @@ public class GameNameScroller : MonoBehaviour
     private const float DURATION_CLOSE = 0.7f;
 
     private Coroutine curr;
+    private StringBuilder sb;
 
-    private void Awake() =>
+    private void Awake() {
         // Hide bar again because it's visible initially in the editor
         Reset();
+        sb = new StringBuilder();
+    }
 
     private IEnumerator _Appear() {
         var elapsed = 0f;
@@ -53,6 +57,17 @@ public class GameNameScroller : MonoBehaviour
 
     public void Appear() => curr = StartCoroutine(_Appear());
     public void Disappear() => curr = StartCoroutine(_Disappear());
+
+    public void UpdateText(string gameName) {
+        sb.Clear();
+        var format = $"{gameName} / ";
+
+        for (var i = 0; i < 9; i++) {
+            sb.Append(format);
+        }
+
+        text.text = sb.ToString();
+    }
 
     public void Reset() {
         if (curr != null) StopCoroutine(curr);

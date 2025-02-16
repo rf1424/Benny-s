@@ -11,7 +11,6 @@ public class HomePageManager : MonoBehaviour
     [SerializeField] private GameObject gamesList;
 
     private void Awake() {
-        background.color = Theme.Up[9];
         overlay.alpha = 1f;
 
         // This way we don't have to manually set it for however many games we have...
