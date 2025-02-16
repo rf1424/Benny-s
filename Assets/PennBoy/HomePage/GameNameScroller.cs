@@ -24,7 +24,7 @@ public class GameNameScroller : MonoBehaviour
     private const float Y_POS_CLOSED = 200f;
     private const float DURATION_APPEAR = 0.6f;
     private const float DURATION_CLOSE = 0.7f;
-    private const float SLOW_DOWN_DURATION = 0.85f;
+    private const float SLOW_DOWN_DURATION = 0.7f;
 
     private Coroutine barCoroutine;
     private Coroutine scrollCoroutine;

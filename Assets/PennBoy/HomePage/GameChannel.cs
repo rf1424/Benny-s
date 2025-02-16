@@ -9,9 +9,13 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
     [HideInInspector] public GameNameScroller scroller;
 
-    [SerializeField] private bool placeholder;
     [SerializeField] private string sceneName;
     [SerializeField] private RectTransform outline;
+
+    [Header("Placeholder Mode")]
+    [SerializeField] private bool placeholder;
+    [SerializeField] private Image background;
+    [SerializeField] private GameObject logo;
 
     private const float SCALE_INIT = 0.8f;
     private const float SCALE_FINAL = 1f;
@@ -27,6 +31,8 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private void Awake() {
         if (placeholder) {
             GetComponent<Button>().enabled = false;
+            background.color = Theme.Up[8];
+            logo.SetActive(true);
         }
     }
 
