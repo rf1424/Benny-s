@@ -13,6 +13,7 @@ public class HomePageManager : MonoBehaviour
 {
     [SerializeField] private RawImage background;
     [SerializeField] private CanvasGroup overlay;
+    [SerializeField] private CanvasGroup secondOverlay;
     [SerializeField] private GameNameScroller scroller;
     [SerializeField] private GameObject gamesList;
     [SerializeField] private GameObject date;
@@ -34,7 +35,7 @@ public class HomePageManager : MonoBehaviour
     private GameObject loadingOutline;
     private RectTransform loadingOutlineRt;
     private Image loadingOutlineImg;
-    private CanvasGroup loadingCG;
+    private Coroutine overlayCoroutine;
 
     private void Awake() {
         overlay.alpha = 1f;
@@ -54,17 +55,16 @@ public class HomePageManager : MonoBehaviour
 
         loadingRt = loadingObj.GetComponent<RectTransform>();
         loadingThumbnail = loadingObj.transform.Find("Mask/Thumbnail").GetComponent<Image>();
-        loadingCG = loadingObj.GetComponent<CanvasGroup>();
 
         loadingOutline = loadingObj.transform.Find("Outline").gameObject;
         loadingOutlineRt = loadingOutline.GetComponent<RectTransform>();
         loadingOutlineImg = loadingOutline.GetComponent<Image>();
     }
 
-    private IEnumerator Start() {
-        yield return Anim.Animate(1f, t => {
+    private void Start() {
+        overlayCoroutine = StartCoroutine(Anim.Animate(1f, t => {
             overlay.alpha = 1 - t;
-        });
+        }));
     }
 
     private void Update() {
@@ -93,6 +93,9 @@ public class HomePageManager : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
+        var op = SceneManager.LoadSceneAsync(sceneName)!;
+        op.allowSceneActivation = false;
+
         // Set channel to correct initial position
         loadingThumbnail.sprite = thumbnail;
         loadingRt.anchoredPosition = pos;
@@ -108,6 +111,8 @@ public class HomePageManager : MonoBehaviour
         var loadingOutlineMaxInit = loadingOutlineRt.offsetMax;
         var loadingOutlineMaxFinal = new Vector2(20f, 20f);
 
+        if (overlay != null) StopCoroutine(overlayCoroutine);
+
         StartCoroutine(Anim.Animate(0.35f, t => {
             overlay.alpha = t;
             pennBoy.alpha = t;
@@ -121,11 +126,13 @@ public class HomePageManager : MonoBehaviour
             loadingOutlineRt.offsetMax = Vector2.Lerp(loadingOutlineMaxInit, loadingOutlineMaxFinal, newT);
         }));
 
-        yield return new WaitForSeconds(0.45f);
+        yield return new WaitForSeconds(0.3f);
 
         // Make clones of the outlines to perform the outward echo animation
         var outlineParent = loadingOutline.transform.parent;
+        var index = 0;
         foreach (var obj in new List<GameObject> {
+                     Instantiate(loadingOutline, outlineParent),
                      Instantiate(loadingOutline, outlineParent),
                      Instantiate(loadingOutline, outlineParent),
                      Instantiate(loadingOutline, outlineParent)
@@ -134,28 +141,26 @@ public class HomePageManager : MonoBehaviour
             var cg = obj.GetComponent<CanvasGroup>();
             var final = Vector3.one * 4f;
 
-            StartCoroutine(Anim.Animate(6f, t => {
+            StartCoroutine(Anim.Animate(4f, t => {
                 rt.localScale = Vector3.Lerp(Vector3.one, final, Easing.EaseOutExpo(t));
             }));
-            StartCoroutine(Anim.Animate(0.55f, t => {
+            StartCoroutine(Anim.Animate(0.35f, t => {
                 cg.alpha = 1f - t;
             }));
 
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.12f + index * 0.04f);
+            index++;
         }
 
-        yield return new WaitForSeconds(0.7f);
-
-        yield return Anim.Animate(0.12f, t => {
-            loadingCG.alpha = 1 - t;
-            pennBoy.alpha = 1 - t;
+        yield return new WaitForSeconds(1f);
+        yield return Anim.Animate(0.35f, t => {
+            secondOverlay.alpha = t;
         });
-
-        Debug.Log($"Opening game with scene: {sceneName}");
+        yield return new WaitForSeconds(0.1f);
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        SceneManager.LoadScene(sceneName);
+        op.allowSceneActivation = true;
     }
 }
