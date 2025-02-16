@@ -1298,7 +1298,7 @@ MonoBehaviour:
   m_fontSizeMin: 30
   m_fontSizeMax: 120
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1493,7 +1493,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -0.0020294, y: 309}
+  m_AnchoredPosition: {x: 0, y: 309}
   m_SizeDelta: {x: 1636, y: 83.5257}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &914664256
@@ -1547,7 +1547,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bar: {fileID: 914664255}
-  text: {fileID: 805659254}
+  nameTextObj: {fileID: 805659252}
+  scrollSpeed: 100
 --- !u!1 &1060947560
 GameObject:
   m_ObjectHideFlags: 0

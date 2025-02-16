@@ -6,10 +6,19 @@ using UnityEngine;
 
 public class GameNameScroller : MonoBehaviour
 {
-    public bool IsCurrentlyOpen => curr != null;
+    public bool IsCurrentlyOpen { get; private set; }
+
+    private float TimerLength {
+        get {
+            // A scroll speed of 100 approximately needs the timer to be 1.5 seconds long
+            var ratio = 100f / scrollSpeed;
+            return 1.5f * ratio;
+        }
+    }
 
     [SerializeField] private RectTransform bar;
-    [SerializeField] private TMP_Text text;
+    [SerializeField] private GameObject nameTextObj;
+    [SerializeField] private float scrollSpeed;
 
     private const float Y_POS_OPEN = 306f;
     private const float Y_POS_CLOSED = 200f;
@@ -18,14 +27,36 @@ public class GameNameScroller : MonoBehaviour
 
     private Coroutine curr;
     private StringBuilder sb;
+    private string format;
+    private TMP_Text gameName;
+    private RectTransform rt;
+    private float timerElapsed;
 
     private void Awake() {
+        sb = new StringBuilder();
+        gameName = nameTextObj.GetComponent<TMP_Text>();
+        rt = nameTextObj.GetComponent<RectTransform>();
+
         // Hide bar again because it's visible initially in the editor
         Reset();
-        sb = new StringBuilder();
+    }
+
+    private void Update() {
+        if (!IsCurrentlyOpen) return;
+
+        rt.anchoredPosition = new Vector2(rt.anchoredPosition.x - Time.deltaTime * scrollSpeed, rt.anchoredPosition.y);
+
+        timerElapsed += Time.deltaTime;
+        if (timerElapsed >= TimerLength) {
+            sb.Append(format);
+            gameName.text = sb.ToString();
+            timerElapsed = 0f;
+        }
     }
 
     private IEnumerator _Appear() {
+        IsCurrentlyOpen = true;
+
         var elapsed = 0f;
         var init = new Vector2(bar.anchoredPosition.x, Y_POS_CLOSED);
         var final = new Vector2(bar.anchoredPosition.x, Y_POS_OPEN);
@@ -53,24 +84,28 @@ public class GameNameScroller : MonoBehaviour
         }
 
         bar.anchoredPosition = final;
+        rt.anchoredPosition = new Vector2(0f, rt.anchoredPosition.y);
+        IsCurrentlyOpen = false;
     }
 
     public void Appear() => curr = StartCoroutine(_Appear());
     public void Disappear() => curr = StartCoroutine(_Disappear());
 
-    public void UpdateText(string gameName) {
+    public void UpdateText(string newGameName) {
         sb.Clear();
-        var format = $"{gameName} / ";
+        format = $"{newGameName} / ";
 
         for (var i = 0; i < 9; i++) {
             sb.Append(format);
         }
 
-        text.text = sb.ToString();
+        gameName.text = sb.ToString();
     }
 
     public void Reset() {
         if (curr != null) StopCoroutine(curr);
         bar.anchoredPosition = new Vector2(bar.anchoredPosition.x, Y_POS_CLOSED);
+        rt.anchoredPosition = new Vector2(0f, rt.anchoredPosition.y);
+        IsCurrentlyOpen = false;
     }
 }
