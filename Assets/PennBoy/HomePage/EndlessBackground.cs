@@ -7,7 +7,7 @@ public class EndlessBackground : MonoBehaviour
 
     // Update is called once per frame
     private void Update() {
-        background.uvRect = new Rect(background.uvRect.x + Time.deltaTime * 0.02f, background.uvRect.y,
+        background.uvRect = new Rect(background.uvRect.x + Time.deltaTime * 0.04f, background.uvRect.y,
                                      background.uvRect.width, background.uvRect.height);
     }
 }
