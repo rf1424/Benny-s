@@ -1,12 +1,15 @@
 using System.Collections;
 using PennBoy;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HomePageManager : MonoBehaviour
 {
+    [SerializeField] private RawImage background;
     [SerializeField] private CanvasGroup overlay;
 
     private void Awake() {
+        background.color = Theme.Up[9];
         overlay.alpha = 1f;
     }
 

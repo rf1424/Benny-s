@@ -37,7 +37,9 @@ public class Pause : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         prevLockState = CursorLockMode.None;
         ResumeGame();
-        SceneManager.LoadScene("HomePage");
+
+        // Let the PulseTransition scene take us back home
+        SceneManager.LoadScene("PulseTransition");
     }
 
     private bool CheckIfBad() {
