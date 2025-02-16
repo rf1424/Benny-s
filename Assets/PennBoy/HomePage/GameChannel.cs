@@ -2,7 +2,6 @@ using System.Collections;
 using PennBoy;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -21,6 +20,8 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private const float SCALE_FINAL = 1f;
 
     private Coroutine curr;
+    private HomePageManager manager;
+    private CanvasGroup canvasGroup;
 
     private enum ScaleAnim
     {
@@ -34,6 +35,9 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             background.color = Theme.Up[8];
             logo.SetActive(true);
         }
+
+        manager = FindAnyObjectByType<HomePageManager>();
+        canvasGroup = GetComponent<CanvasGroup>();
     }
 
     public void OnPointerEnter(PointerEventData eventData) {
@@ -71,10 +75,10 @@ public class GameChannel : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         outline.localScale = final;
     }
 
-    public void OpenGame() {
+    public void Open() {
         if (placeholder) return;
 
-        Debug.Log($"Opening game with scene: {sceneName}");
-        SceneManager.LoadScene(sceneName);
+        canvasGroup.alpha = 0f;
+        StartCoroutine(manager.OpenGame(sceneName, background.sprite, GetComponent<RectTransform>().anchoredPosition));
     }
 }

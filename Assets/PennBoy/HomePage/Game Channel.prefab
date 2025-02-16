@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6560647967451550247}
   - component: {fileID: 6631515606081111200}
   - component: {fileID: 1627557730683019476}
+  - component: {fileID: 8233546471643251427}
   m_Layer: 5
   m_Name: Game Channel
   m_TagString: Untagged
@@ -112,7 +113,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6631515606081111200}
         m_TargetAssemblyTypeName: GameChannel, Assembly-CSharp
-        m_MethodName: OpenGame
+        m_MethodName: Open
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -122,6 +123,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &8233546471643251427
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251486149472376521}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5302359067487501612
 GameObject:
   m_ObjectHideFlags: 0
@@ -397,7 +410,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0009, y: -0.0007}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 429.8828, y: 262.3821}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5129736413321455817
