@@ -19,6 +19,7 @@ public class HomePageManager : MonoBehaviour
     [SerializeField] private GameObject date;
     [SerializeField] private GameObject time;
     [SerializeField] private CanvasGroup pennBoy;
+    [SerializeField] private AudioSource music;
 
     [Header("Current Loading Game")]
     [SerializeField] private GameObject loadingObj;
@@ -28,7 +29,7 @@ public class HomePageManager : MonoBehaviour
 
     private CanvasGroup dateCG;
     private CanvasGroup timeCG;
-    private TMP_Text timeText;
+    private Clock clock;
     private float timerElapsed;
     private RectTransform loadingRt;
     private Image loadingThumbnail;
@@ -36,6 +37,7 @@ public class HomePageManager : MonoBehaviour
     private RectTransform loadingOutlineRt;
     private Image loadingOutlineImg;
     private Coroutine overlayCoroutine;
+    private bool currentlyQuitting;
 
     private void Awake() {
         overlay.alpha = 1f;
@@ -50,8 +52,9 @@ public class HomePageManager : MonoBehaviour
 
         dateCG = date.GetComponent<CanvasGroup>();
         timeCG = time.GetComponent<CanvasGroup>();
-        timeText = time.GetComponent<TMP_Text>();
-        timeText.text = $"{now:HH:mm}";
+
+        clock = time.GetComponent<Clock>();
+        clock.SetTime(now);
 
         loadingRt = loadingObj.GetComponent<RectTransform>();
         loadingThumbnail = loadingObj.transform.Find("Mask/Thumbnail").GetComponent<Image>();
@@ -68,7 +71,9 @@ public class HomePageManager : MonoBehaviour
     }
 
     private void Update() {
-        timeText.text = $"{DateTime.Now:HH:mm}";
+        var now = DateTime.Now;
+        date.GetComponent<TMP_Text>().text = $"{now:ddd} {now.Month}/{now.Day}";
+        clock.SetTime(now);
 
         timerElapsed += Time.deltaTime;
         if (timerElapsed >= TIMER_LENGTH) {
@@ -113,9 +118,11 @@ public class HomePageManager : MonoBehaviour
 
         if (overlay != null) StopCoroutine(overlayCoroutine);
 
+        var initialVolume = music.volume;
         StartCoroutine(Anim.Animate(0.35f, t => {
             overlay.alpha = t;
             pennBoy.alpha = t;
+            music.volume = Mathf.Lerp(initialVolume, 0f, t);
             loadingOutlineImg.color = Color.Lerp(Theme.Up[1], Color.white, t);
         }));
         StartCoroutine(Anim.Animate(0.65f, t => {
@@ -162,5 +169,24 @@ public class HomePageManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
 
         op.allowSceneActivation = true;
+    }
+
+    private IEnumerator _Quit() {
+        if (overlay != null) StopCoroutine(overlayCoroutine);
+
+        var initialVolume = music.volume;
+        yield return StartCoroutine(Anim.Animate(1f, t => {
+            overlay.alpha = t;
+            music.volume = Mathf.Lerp(initialVolume, 0f, t);
+        }));
+
+        Application.Quit();
+    }
+
+    public void Quit() {
+        if (currentlyQuitting) return;
+
+        currentlyQuitting = true;
+        StartCoroutine(_Quit());
     }
 }
