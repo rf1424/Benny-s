@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+namespace SlidingPuzzle {
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private Transform gameTransform;
@@ -251,4 +252,5 @@ public class GameManager : MonoBehaviour
             pickingDoors = true;
         }
     }
+}
 }
